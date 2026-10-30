@@ -27,6 +27,37 @@ npm run dev
 ```
 Приложение: http://localhost:5173. 
 
+## Запуск через Docker
+
+```bash
+cp .env.example .env        
+cd backend
+cp .env.example .env        
+docker compose up --build
+```
+API будет на http://localhost:8000/docs. 
+
+## Модель данных
+
+- **users**: id, email (уникальный), name
+- **trips**: id, title, destination, description, start_date, end_date, max_people, owner_id → users
+- **members**: id, trip_id → trips, user_id → users (пара trip_id + user_id уникальна). Связь «многие ко многим» между пользователями и поездками
+- **plan_items**: id, trip_id → trips, day, title, note
+- **expenses**: id, trip_id → trips, paid_by → users, title, amount
+- **messages**: id, trip_id → trips, user_id → users, text, created_at
+
+При удалении поездки удаляются её участники, план, траты и сообщения.
+
+## Структура backend (`backend/app`)
+
+- `main.py`: создание приложения, CORS, подключение маршрутов
+- `config.py`: настройки из `.env`
+- `database.py`: подключение к БД и сессии
+- `models.py`: таблицы SQLAlchemy
+- `schemas.py`: схемы валидации запросов и ответов (Pydantic)
+- `deps.py`: проверка прав доступа (текущий пользователь, участник, организатор). Пока без паролей пользователь определяется заголовком `X-User-Id` 
+- `routers/`: маршруты API (`users.py`: временное создание пользователей, `trips.py`, `trip_details.py`: план, расходы, чат)
+
 ## Скриншоты
 
 Папка `docs/screenshots`
