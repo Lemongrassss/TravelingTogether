@@ -3,15 +3,17 @@ import { Button, Card, Col, Empty, Row, Tag, Typography } from 'antd'
 import { Link } from 'react-router-dom'
 import TripFilters from '@/features/trip-filters/TripFilters'
 import { useTrips } from '@/app/TripsContext'
+import { useAuth } from '@/app/AuthContext'
 
 export default function TripsPage() {
-  const { trips, profile } = useTrips()
+  const { trips } = useTrips()
+  const { user } = useAuth()
   const [query, setQuery] = useState('')
   const [owner, setOwner] = useState('all')
   const visibleTrips = useMemo(() => trips.filter((trip) => {
     const matchesText = `${trip.title} ${trip.destination}`.toLowerCase().includes(query.toLowerCase())
-    return matchesText && (owner === 'all' || trip.owner === profile.name)
-  }), [trips, query, owner, profile.name])
+    return matchesText && (owner === 'all' || trip.owner === user?.name)
+  }), [trips, query, owner, user?.name])
 
   return (
     <>

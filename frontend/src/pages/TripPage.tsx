@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Alert, Button, DatePicker, Empty, Form, Input, InputNumber, List, message, Popconfirm, Select, Space, Tabs, Tag, Typography } from 'antd'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '@/app/AuthContext'
 import { useTrips } from '@/app/TripsContext'
 import type { Trip } from '@/entities/trip/model'
 
@@ -10,6 +11,7 @@ type ExpenseValues = { title: string; amount: number }
 export default function TripPage() {
   const { id } = useParams()
   const { trips, profile, updateTrip, deleteTrip } = useTrips()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [chatText, setChatText] = useState('')
   const [planQuery, setPlanQuery] = useState('')
@@ -22,8 +24,9 @@ export default function TripPage() {
   if (!trip) return <Alert type="error" showIcon message="Поездка не найдена" />
 
   const change = (update: (current: Trip) => Trip) => updateTrip(trip.id, update)
-  const isOwner = trip.owner === profile.name
-  const isJoined = trip.joined || isOwner
+  const actorName = user?.name || profile.name
+  const isOwner = Boolean(user && trip.owner === user.name)
+  const isJoined = Boolean(user && (trip.joined || isOwner))
   const join = () => {
     if (isJoined) return
     if (trip.members >= trip.maxPeople) return message.error('Свободных мест нет')
@@ -38,11 +41,11 @@ export default function TripPage() {
     id: Date.now(), day: values.day.format('YYYY-MM-DD'), title: values.title.trim(), note: values.note?.trim() || '',
   }] }))
   const addExpense = (values: ExpenseValues) => change((item) => ({ ...item, expenses: [...item.expenses, {
-    id: Date.now(), title: values.title.trim(), amount: values.amount, who: profile.name,
+    id: Date.now(), title: values.title.trim(), amount: values.amount, who: actorName,
   }] }))
   const sendMessage = () => {
     if (!chatText.trim()) return
-    change((item) => ({ ...item, messages: [...item.messages, { id: Date.now(), who: profile.name, text: chatText.trim() }] }))
+    change((item) => ({ ...item, messages: [...item.messages, { id: Date.now(), who: actorName, text: chatText.trim() }] }))
     setChatText('')
   }
   const visiblePlan = trip.plan.filter((item) =>
@@ -74,7 +77,8 @@ export default function TripPage() {
             <Button danger>Удалить поездку</Button>
           </Popconfirm>
         </> : isJoined ? <Button danger onClick={leave}>Выйти из поездки</Button>
-          : <Button type="primary" onClick={join}>Присоединиться</Button>}
+          : user ? <Button type="primary" onClick={join}>Присоединиться</Button>
+            : <Link to="/login"><Button type="primary">Войти, чтобы участвовать</Button></Link>}
       </Space>
 
       <Tabs items={[
