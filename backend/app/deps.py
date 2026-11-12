@@ -1,14 +1,28 @@
-from fastapi import Depends, Header, HTTPException
+import jwt
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models import Trip, User
 
+bearer = HTTPBearer(auto_error=False)
 
-def get_current_user(x_user_id: int | None = Header(None), db: Session = Depends(get_db)) -> User:
-    user = db.get(User, x_user_id) if x_user_id else None
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
+    db: Session = Depends(get_db),
+) -> User:
+    if credentials is None:
+        raise HTTPException(401, "Требуется Bearer access token")
+    try:
+        payload = jwt.decode(credentials.credentials, settings.auth_secret_key, algorithms=["HS256"])
+        user_id = int(payload["sub"])
+    except (jwt.PyJWTError, KeyError, ValueError):
+        raise HTTPException(401, "Access token недействителен или истёк")
+    user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(401, "Укажите заголовок X-User-Id существующего пользователя")
+        raise HTTPException(401, "Пользователь не найден")
     return user
 
 

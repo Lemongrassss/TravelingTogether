@@ -1,24 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app import schemas
 from app.database import get_db
+from app.deps import get_current_user
 from app.models import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("", response_model=list[schemas.UserOut])
-def list_users(db: Session = Depends(get_db)):
+def list_users(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return db.query(User).all()
-
-
-@router.post("", response_model=schemas.UserOut, status_code=201)
-def create_user(data: schemas.UserCreate, db: Session = Depends(get_db)):
-    if db.query(User).filter(User.email == data.email).first():
-        raise HTTPException(409, "Пользователь с таким email уже существует")
-    user = User(**data.model_dump())
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
