@@ -1,8 +1,8 @@
 from fastapi import Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
-from .database import get_db
-from .models import Trip, User
+from app.database import get_db
+from app.models import Trip, User
 
 
 def get_current_user(x_user_id: int | None = Header(None), db: Session = Depends(get_db)) -> User:

@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import settings
-from .database import Base, engine
-from .routers import trip_details, trips, users
+from app.config import settings
+from app.database import Base, engine
+from app.routers import trip_details, trips, users
+from app.models import Expense, Member, Message, PlanItem, Trip, User
 
 Base.metadata.create_all(engine)
 
