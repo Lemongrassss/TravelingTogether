@@ -12,10 +12,8 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   if (!user) return null
 
-  const myTrips = trips.filter((trip) => trip.owner === user.name)
-  const joinedTrips = trips.filter((trip) => trip.joined)
-  const myExpenses = joinedTrips.flatMap((trip) => trip.expenses).filter((expense) => expense.who === user.name)
-  const myMessages = joinedTrips.flatMap((trip) => trip.messages).filter((item) => item.who === user.name).length
+  const myTrips = trips.filter((trip) => trip.ownerId === user.id)
+  const joinedTrips = trips.filter((trip) => trip.memberIds?.includes(user.id))
   const renderTrips = (items: typeof trips, emptyText: string) => items.length ? (
     <List dataSource={items} renderItem={(trip) => <List.Item actions={[
       <Link key="open" to={`/trips/${trip.id}`}>Открыть</Link>,
@@ -47,8 +45,6 @@ export default function ProfilePage() {
       <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
         <Col xs={12} md={6}><Card><Statistic title="Мои поездки" value={myTrips.length} /></Card></Col>
         <Col xs={12} md={6}><Card><Statistic title="Участвую" value={joinedTrips.length} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Мои расходы" value={myExpenses.reduce((sum, item) => sum + item.amount, 0)} suffix="₽" /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Сообщения" value={myMessages} /></Card></Col>
       </Row>
 
       <Tabs items={[

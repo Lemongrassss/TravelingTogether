@@ -13,6 +13,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<TripsPage />} />
         <Route path="/trips/new" element={<RequireAuth><TripFormPage /></RequireAuth>} />
+        <Route path="/trips/:id/edit" element={<RequireAuth><TripFormPage /></RequireAuth>} />
         <Route path="/trips/:id" element={<TripPage />} />
         <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
         <Route path="/login" element={<AuthPage mode="login" />} />

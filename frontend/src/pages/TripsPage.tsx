@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
-import { Button, Card, Col, Empty, Row, Tag, Typography } from 'antd'
+import { Alert, Button, Card, Col, Empty, Row, Spin, Tag, Typography } from 'antd'
 import { Link } from 'react-router-dom'
 import TripFilters from '@/features/trip-filters/TripFilters'
 import { useTrips } from '@/app/TripsContext'
 import { useAuth } from '@/app/AuthContext'
 
 export default function TripsPage() {
-  const { trips } = useTrips()
+  const { trips, loading, error, reload } = useTrips()
   const { user } = useAuth()
   const [query, setQuery] = useState('')
   const [owner, setOwner] = useState('all')
@@ -18,8 +18,9 @@ export default function TripsPage() {
   return (
     <>
       <Typography.Title level={2}>Идеи поездок</Typography.Title>
+      {error && <Alert type="error" showIcon message={error} action={<Button onClick={() => void reload()}>Повторить</Button>} />}
       <TripFilters query={query} owner={owner} setQuery={setQuery} setOwner={setOwner} />
-      {visibleTrips.length === 0 ? <Empty description="Поездки не найдены" /> : (
+      {loading ? <Spin style={{ display: 'block', margin: 50 }} /> : visibleTrips.length === 0 ? <Empty description="Поездки не найдены" /> : (
         <Row gutter={[16, 16]}>
           {visibleTrips.map((trip) => (
             <Col xs={24} md={12} lg={8} key={trip.id}>

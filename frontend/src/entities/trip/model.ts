@@ -12,6 +12,8 @@ export type Trip = {
   maxPeople: number
   description: string
   owner: string
+  ownerId?: number
+  memberIds?: number[]
   joined: boolean
   plan: PlanItem[]
   expenses: Expense[]

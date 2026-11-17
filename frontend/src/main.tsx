@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ConfigProvider locale={ru} theme={{ token: { colorPrimary: '#0f766e' } }}>
       <BrowserRouter>
-        <TripsProvider><AuthProvider><App /></AuthProvider></TripsProvider>
+        <AuthProvider><TripsProvider><App /></TripsProvider></AuthProvider>
       </BrowserRouter>
     </ConfigProvider>
   </React.StrictMode>,
